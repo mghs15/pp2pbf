@@ -1,7 +1,4 @@
 const yearsList = [
-  1900,
-  1910,
-  1920,
   1930,
   1940,
   1950,
@@ -37,8 +34,8 @@ const setPpSources = (upYear, lwYear) => {
     map.addSource(sourceid, {
       type: 'vector',
       tiles: ['./pbf/pp/' + ys + 's/{z}/{x}/{y}.pbf'],
-      minzoom: 12,
-      maxzoom: 12
+      minzoom: 11,
+      maxzoom: 11
     });
   }
 }
@@ -54,40 +51,53 @@ const showPp = (upYear, lwYear) => {
     const sourceid = ys + 's';
     const layerid = ys + 's';
     
-    if(map.getLayer(layerid + 'debug')){
-      map.removeLayer(layerid + 'debug');
-    }
-    if(map.getLayer(layerid)){
-      map.removeLayer(layerid);
-      if(map.getSource(sourceid)){
-        map.removeSource(sourceid);
+    if(+ys > lwYears && upYears <= +ys){
+      
+      if(map.getLayer(layerid + 'debug')){
+        map.removeLayer(layerid + 'debug');
+      }
+      if(map.getLayer(layerid)){
+        map.removeLayer(layerid);
+        if(map.getSource(sourceid)){
+          map.removeSource(sourceid);
+        }
+      }
+    }else{
+      
+      if(map.getLayer(layerid + 'debug')){
+        map.removeLayer(layerid + 'debug');
+      }
+      if(map.getLayer(layerid)){
+        map.removeLayer(layerid);
       }
     }
     
-    if(+ys >= lwYears && upYears >= +ys){
+    
+    if(+ys >= lwYears && upYears > +ys){
       
       console.log('-', ys);
       
-      map.addSource(sourceid, {
-        type: 'vector',
-        tiles: ['http://localhost/210405_pp/pbf/' + ys + 's/{z}/{x}/{y}.pbf'],
-        minzoom: 12,
-        maxzoom: 12
-      });
-      
+      if(!map.getSource(sourceid)){
+        map.addSource(sourceid, {
+          type: 'vector',
+          tiles: ['https://mghs15.github.io/pp2pbf/pbf/' + ys + 's/{z}/{x}/{y}.pbf'],
+          minzoom: 11,
+          maxzoom: 11
+        });
+      }
       
       map.addLayer({
         'id': sourceid + 'debug',
         'type': 'circle',
         'source': sourceid,
-        'minzoom': 12,
+        'minzoom': 11,
         'maxzoom': 22,
         'layout': {
           'visibility': 'visible'
         },
         'paint': {
           'circle-radius': 10,
-          'circle-color': ['rgba', 0,0,0,1]
+          'circle-color': ['rgba', 255,255,255,0.3]
         },
         'source-layer': 'pp'
       });
@@ -96,7 +106,7 @@ const showPp = (upYear, lwYear) => {
         'id': sourceid,
         'type': 'circle',
         'source': sourceid,
-        'minzoom': 12,
+        'minzoom': 11,
         'maxzoom': 22,
         'filter': [
           'all',
@@ -111,7 +121,7 @@ const showPp = (upYear, lwYear) => {
           'circle-color': ['rgba', 
             255, 
             ["*", 2, ["to-number", ["slice", ["get", "撮影年月日"], 2, 4]]],
-            0,
+            ["-", 255, ["*", 2, ["to-number", ["slice", ["get", "撮影年月日"], 2, 4]]]],
             1]
         },
         'source-layer': 'pp'
