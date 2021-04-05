@@ -2,7 +2,12 @@
 const fs = require('fs')
 
 const readPpGeojson = (filename) => {
-  fs.readFile(filename, 'utf8', (err, data) => {
+    const data = fs.readFileSync(filename, 'utf8');
+    
+    if(!data){
+      console.log("Error:", filename);
+      return;
+    }
     
     // BOMを無視する https://webbibouroku.com/Blog/Article/node-bom-utf8
     if (data.charCodeAt(0) === 0xFEFF) {
@@ -25,13 +30,14 @@ const readPpGeojson = (filename) => {
       //書き出し
       console.log(yearsfile);
       const s = JSON.stringify(f) + "\n";
-      fs.appendFile(yearsfile, s, (err) => {
-        if (err) throw err;
-      });
-        
+      
+      try{
+        fs.appendFileSync(yearsfile, s);
+      }catch(err){
+        console.log(err);
+      }
+      
     });
-    
-  });
 } 
 
 
@@ -41,7 +47,7 @@ fs.readdir(dir, (err, files) => {
   
   files.forEach( file => {
     if(file.match(/^14/)){
-      const filepath = dir + '/' + file;
+      const filepath = './' + dir + '/' + file;
       console.log(filepath);
       readPpGeojson(filepath);
     }
