@@ -57,8 +57,9 @@ button.local {
 <div id='map'></div>
 <div id='menu'>
   <form name="question">
-    <input type="range" id="lower" name="lower" min="1920" max="2021" list="tickmarks" value="2021" onChange="refleshPp();"><br>
-    <input type="range" id="upper" name="upper" min="1920" max="2021" list="tickmarks" value="2015" onChange="refleshPp();">
+    <input type="range" id="lower" name="lower" min="1920" max="2021" list="tickmarks" value="2021" onChange="refleshPp();"><span id="lwYearNum"></span><br>
+    <input type="range" id="upper" name="upper" min="1920" max="2021" list="tickmarks" value="2015" onChange="refleshPp();"><span id="upYearNum"></span><br>
+    <span>撮影計画機関：</span><input type="text" id="kikan" name="kikan" value="" onChange="refleshPp();">
     
     <datalist id="tickmarks">
       <option value="1900" label="0%"></option>
@@ -117,6 +118,33 @@ map.on('click', function(e) {
   
   var htmlString = ""; //ポップアップ
   
+  var feature = features[0]; //一番上のものだけ表示
+  console.log(feature);
+  if(feature.sourceLayer && feature.sourceLayer == "pp"){
+  
+      var featureProperties = "<table>";
+      for(name in feature.properties){
+          if(name == "ID"){
+              featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#0000ff;'>" + name + "</td>";
+              featureProperties = featureProperties + "<td style='color:#000000;'>"
+                                + "<a target='_blank' href='https://mapps.gsi.go.jp/maplibSearch.do?specificationId=" + feature.properties[name] + "'>"
+                                + feature.properties[name] + "</a>" + "</td></tr>";
+              /*
+              featureProperties = featureProperties + "<td style='color:#000000;'>"
+                                + "<img src='https://mapps.gsi.go.jp/contentsImage.do?specificationId=" + feature.properties[name]  + "'>"
+                                + "</td></tr>";
+              */
+          }else{
+              featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#0000ff;'>" + name + "</td>";
+              featureProperties = featureProperties + "<td style='color:#000000;'>" + feature.properties[name] + "</td></tr>";
+          }
+      
+      }
+      featureProperties = featureProperties +  "</table>";
+      htmlString = htmlString + "<span style='font-weight:bold;' >" + feature.layer.id + ":" + feature.sourceLayer + "</span>" + featureProperties;
+  }
+  
+  /*
   for(i in features){
       
       
@@ -125,7 +153,6 @@ map.on('click', function(e) {
       if(!feature.sourceLayer  || feature.sourceLayer != "pp") continue;
       //console.log(feature);
       
-    
       var featureProperties = "<table>";
       for(name in feature.properties){
           featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#0000ff;'>" + name + "</td>";
@@ -139,6 +166,7 @@ map.on('click', function(e) {
     
     
   }
+  */
   
   //結果の表示
   //ポップアップ

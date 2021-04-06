@@ -14,6 +14,7 @@ const yearsList = [
 
 const startYear = 1900;
 const endYear = 2021;
+const root = "https://mghs15.github.io/pp2pbf/";
 
 /*
 const setPpSources = (upYear, lwYear) => {
@@ -41,16 +42,23 @@ const setPpSources = (upYear, lwYear) => {
 }
 */
 
-const showPp = (upYear, lwYear) => {
+const showPp = (upYear, lwYear, filterArr) => {
   const upYears = Math.ceil(upYear/10)*10;
   const lwYears = Math.floor(lwYear/10)*10;
   
 
   yearsList.forEach( ys => {
     
+    //大縮尺用
     const sourceid = ys + 's';
     const layerid = ys + 's';
     
+    //小縮尺用（クラスタリング）
+    const sourceidszl = ys + 's-szl';
+    const layeridszl = ys + 's-szl';
+    
+    //既存のソース・レイヤを削除
+    //既存のソースをそのまま利用できるように、年代に応じてソース削除の有無あり
     if(+ys > lwYears && upYears <= +ys){
       
       if(map.getLayer(layerid + 'debug')){
@@ -62,6 +70,16 @@ const showPp = (upYear, lwYear) => {
           map.removeSource(sourceid);
         }
       }
+      //小縮尺用（クラスタリング）
+      if(map.getLayer(layeridszl + 'text')){
+        map.removeLayer(layeridszl + 'text');
+      }
+      if(map.getLayer(layeridszl)){
+        map.removeLayer(layeridszl);
+        if(map.getSource(sourceidszl)){
+          map.removeSource(sourceidszl);
+        }
+      }
     }else{
       
       if(map.getLayer(layerid + 'debug')){
@@ -70,6 +88,12 @@ const showPp = (upYear, lwYear) => {
       if(map.getLayer(layerid)){
         map.removeLayer(layerid);
       }
+      if(map.getLayer(layeridszl)){
+        map.removeLayer(layeridszl);
+      }
+      if(map.getLayer(layeridszl + 'text')){
+        map.removeLayer(layeridszl + 'text');
+      }
     }
     
     
@@ -77,15 +101,27 @@ const showPp = (upYear, lwYear) => {
       
       console.log('-', ys);
       
+      //フィルタ条件の整理
+      const filterYear = [
+          'all',
+          ['>=', ["to-number", ["slice", ["get", "撮影年月日"], 0, 4]], lwYear],
+          ['<=', ["to-number", ["slice", ["get", "撮影年月日"], 0, 4]], upYear]
+      ];
+      
+      const filter = filterYear.concat(filterArr);
+      
+      
+      //大縮尺用ソース・レイヤの追加
       if(!map.getSource(sourceid)){
         map.addSource(sourceid, {
           type: 'vector',
-          tiles: ['https://mghs15.github.io/pp2pbf/pbf/' + ys + 's/{z}/{x}/{y}.pbf'],
+          tiles: [root + '/pbf/' + ys + 's/{z}/{x}/{y}.pbf'],
           minzoom: 11,
           maxzoom: 11
         });
       }
       
+      /*
       map.addLayer({
         'id': sourceid + 'debug',
         'type': 'circle',
@@ -101,18 +137,14 @@ const showPp = (upYear, lwYear) => {
         },
         'source-layer': 'pp'
       });
-      
+      */
       map.addLayer({
         'id': sourceid,
         'type': 'circle',
         'source': sourceid,
         'minzoom': 11,
         'maxzoom': 22,
-        'filter': [
-          'all',
-          ['>', ["to-number", ["slice", ["get", "撮影年月日"], 0, 4]], lwYear],
-          ['<', ["to-number", ["slice", ["get", "撮影年月日"], 0, 4]], upYear]
-        ],
+        'filter': filter,
         'layout': {
           'visibility': 'visible'
         },
@@ -127,6 +159,60 @@ const showPp = (upYear, lwYear) => {
         'source-layer': 'pp'
       });
       
+      console.log('-', ys);
+      
+      //小縮尺用にクラスタリングしたタイル
+      
+      if(!map.getSource(sourceidszl)){
+        map.addSource(sourceidszl, {
+          type: 'vector',
+          tiles: [root + '/pbf_szl/' + ys + 's/{z}/{x}/{y}.pbf'],
+          minzoom: 6,
+          maxzoom: 10
+        });
+      }
+      
+      map.addLayer({
+        'id': sourceidszl,
+        'type': 'circle',
+        'source': sourceidszl,
+        'minzoom': 6,
+        'maxzoom': 11,
+        'layout': {
+          'visibility': 'visible'
+        },
+        'paint': {
+          'circle-radius': 16,
+          'circle-color': ['rgba', 
+            255, 
+            ["*", 2, ["to-number", ["slice", ["get", "撮影年月日"], 2, 4]]],
+            ["-", 255, ["*", 2, ["to-number", ["slice", ["get", "撮影年月日"], 2, 4]]]],
+            0.3]
+        },
+        'source-layer': 'ppcls'
+      });
+      map.addLayer({
+        'id': sourceidszl + 'text',
+        'type': 'symbol',
+        'source': sourceidszl,
+        'minzoom': 6,
+        'maxzoom': 11,
+        'layout': {
+          'text-field': ["case",
+            ["has", "point_count"],["get", "point_count"],
+            "1"
+          ],
+          'text-font': ["NotoSansCJKjp-Regular"],
+          'text-allow-overlap': true,
+          'visibility': 'visible'
+        },
+        'paint': {
+          'text-color': ['rgba', 0,0,0,1],
+          'text-halo-color': ['rgba', 255,255,255,1],
+          'text-halo-width': 2
+        },
+        'source-layer': 'ppcls'
+      });
       
     }
     
@@ -136,10 +222,25 @@ const showPp = (upYear, lwYear) => {
 const refleshPp = () =>{
   const l = +document.question.lower.value;
   const u = +document.question.upper.value;
+  
+  document.getElementById('lwYearNum').innerText = l;
+  document.getElementById('upYearNum').innerText = u;
+  
+  
+  
   const upy = Math.max(l,u);
   const lwy = Math.min(l,u);
   console.log(upy, lwy);
-  showPp(upy, lwy)
+  
+  const filterArr = [];
+  const kikan = document.question.kikan.value;
+  console.log(kikan);
+  
+  if(kikan){
+    filterArr.push( ["==", ["get", "撮影計画機関"], kikan] );
+  }
+  
+  showPp(upy, lwy, filterArr);
 }
 
 map.on('load', function(){
