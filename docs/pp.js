@@ -14,7 +14,7 @@ const yearsList = [
 
 const startYear = 1900;
 const endYear = 2021;
-const root = "https://mghs15.github.io/pp2pbf/";
+const root = "https://mghs15.github.io/pp2pbf";
 
 /*
 const setPpSources = (upYear, lwYear) => {
