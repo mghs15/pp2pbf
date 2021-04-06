@@ -149,7 +149,7 @@ const showPp = (upYear, lwYear, filterArr) => {
           'visibility': 'visible'
         },
         'paint': {
-          'circle-radius': 8,
+          'circle-radius': 5,
           'circle-color': ['rgba', 
             255, 
             ["*", 2, ["to-number", ["slice", ["get", "撮影年月日"], 2, 4]]],
