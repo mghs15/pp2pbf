@@ -57,12 +57,12 @@ button.local {
 <div id='map'></div>
 <div id='menu'>
   <form name="question">
+    
     <input type="range" id="lower" name="lower" min="1920" max="2021" list="tickmarks" value="2021" onChange="refleshPp();"><span id="lwYearNum"></span><br>
     <input type="range" id="upper" name="upper" min="1920" max="2021" list="tickmarks" value="2015" onChange="refleshPp();"><span id="upYearNum"></span><br>
-    <span>撮影計画機関：</span><input type="text" id="kikan" name="kikan" value="" onChange="refleshPp();">
     
     <datalist id="tickmarks">
-      <option value="1900" label="0%"></option>
+      <option value="1900" label="1900"></option>
       <option value="1910"></option>
       <option value="1920"></option>
       <option value="1930"></option>
@@ -76,6 +76,56 @@ button.local {
       <option value="2010"></option>
       <option value="2020"></option>
     </datalist>
+    
+    
+    <span>撮影計画機関：</span>
+    <input type="text" id="kikan" name="kikan" value="" onChange="refleshPp();">
+    
+    <span>　色：</span>
+    <select name="pcolor" onChange="refleshPp();">
+      <option value="cm">カラーとモノクロ</option>
+      <option value="c">カラーだけ</option>
+      <option value="m">モノクロだけ</option>
+    </select>
+    
+    <span>　縮尺：</span>
+    <select name="pscalestart" onChange="refleshPp();">
+      <option value="0">--</option>
+      <option value="5000">1/5000</option>
+      <option value="10000">1/10000</option>
+      <option value="20000">1/20000</option>
+      <option value="25000">1/25000</option>
+      <option value="50000">1/50000</option>
+      <option value="100000">1/100000</option>
+      <option value="200000">1/200000</option>
+      <option value="500000">1/500000</option>
+      <option value="1000000">1/1000000</option>
+      <option value="5000000">1/5000000</option>
+    </select>
+    <span>～</span>
+    <select name="pscaleend" onChange="refleshPp();">
+      <option value="5000">1/5000</option>
+      <option value="10000">1/10000</option>
+      <option value="20000">1/20000</option>
+      <option value="25000">1/25000</option>
+      <option value="50000">1/50000</option>
+      <option value="100000">1/100000</option>
+      <option value="200000">1/200000</option>
+      <option value="500000">1/500000</option>
+      <option value="1000000">1/1000000</option>
+      <option value="5000000">1/5000000</option>
+      <option value="99999999" selected="selected">--</option>
+    </select>
+    
+    <!--
+    <input type="number" id="pscale" name="pscale" value="0" onChange="refleshPp();">
+    <select name="pscalecond">
+      <option value="higher">以上</option>
+      <option value="equal">に等しい</option>
+      <option value="lower">以下</option>
+    </select>
+    -->
+    
   </form>
 </div>
 
@@ -127,7 +177,7 @@ map.on('click', function(e) {
           if(name == "ID"){
               featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#0000ff;'>" + name + "</td>";
               featureProperties = featureProperties + "<td style='color:#000000;'>"
-                                + "<a target='_blank' href='https://mapps.gsi.go.jp/maplibSearch.do?specificationId=" + feature.properties[name] + "'>"
+                                + "<a target='_blank' href='https://mapps.gsi.go.jp/map-lib-api/apiContentsView.do?specificationId=" + feature.properties[name] + "'>"
                                 + feature.properties[name] + "</a>" + "</td></tr>";
               /*
               featureProperties = featureProperties + "<td style='color:#000000;'>"
@@ -142,6 +192,11 @@ map.on('click', function(e) {
       }
       featureProperties = featureProperties +  "</table>";
       htmlString = htmlString + "<span style='font-weight:bold;' >" + feature.layer.id + ":" + feature.sourceLayer + "</span>" + featureProperties;
+  }
+  
+  if (!htmlString || htmlString == "") {
+    popup.remove();
+    return;
   }
   
   /*

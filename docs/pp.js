@@ -226,8 +226,6 @@ const refleshPp = () =>{
   document.getElementById('lwYearNum').innerText = l;
   document.getElementById('upYearNum').innerText = u;
   
-  
-  
   const upy = Math.max(l,u);
   const lwy = Math.min(l,u);
   console.log(upy, lwy);
@@ -235,11 +233,27 @@ const refleshPp = () =>{
   const filterArr = [];
   const kikan = document.question.kikan.value;
   console.log(kikan);
-  
   if(kikan){
-    filterArr.push( ["==", ["get", "撮影計画機関"], kikan] );
+    filterArr.push( ["in", kikan, ["get", "撮影計画機関"]] );
   }
   
+  const pcolor = document.question.pcolor.value;
+  if(pcolor == "c"){
+    filterArr.push( ["==", ["get", "カラー種別"], "カラー"] );
+  }else if(pcolor == "m"){
+    filterArr.push( ["==", ["get", "カラー種別"], "モノクロ"] );
+  }
+  
+  const ps1 = +document.question.pscalestart.value;
+  const ps2 = +document.question.pscaleend.value;
+  const pscalestart = Math.min(ps1, ps2);
+  const pscaleend = Math.max(ps1, ps2);
+  if(true){
+    filterArr.push( [">=", ["get", "撮影縮尺"], pscalestart] );
+    filterArr.push( ["<=", ["get", "撮影縮尺"], pscaleend] );
+  }
+  
+  console.log(filterArr);
   showPp(upy, lwy, filterArr);
 }
 
