@@ -2,18 +2,21 @@
 const child_process = require('child_process');
 const fs = require('fs')
 
-const dir = 'dst';
+const dir = 'sz_dst';
+const outdirroot = 'sz_mb';
 
 const option = [
   '--force', 
   '--no-tile-size-limit', 
   '--no-tile-compression',
   '--no-feature-limit',
-  '--minimum-zoom=' + 11,
-  '--maximum-zoom=' + 11,
-  '--base-zoom=' + 11,
+  '--minimum-zoom=' + 6,
+  '--maximum-zoom=' + 10,
+  '--base-zoom=' + 10,
   '--simplification=' + 2,
-  '-l', 'pp'
+  '-r1',
+  '--cluster-distance=' + 100, //clusting points within this pixel
+  '-l', 'ppcls'
 ];
 
 
@@ -22,14 +25,14 @@ fs.readdir(dir, (err, files) => {
   
   files.forEach( file => {
     const filepath = dir + '/' + file;
-    const outdir = file.substr(3,5); // 要調整
+    const outpath = file.replace('ndjson', 'mbtiles'); // 要調整
     
     //コマンド生成
     let command = 'tippecanoe';
     option.forEach( op => {
       command = command + " " + op;
     });
-    command = command + ' -e ' + 'pbf/' + outdir + " " + filepath;
+    command = command + ' -o ' + outdirroot + '/' + outpath + " " + filepath;
     console.log(command);
     child_process.execSync(`${command}`);
   });

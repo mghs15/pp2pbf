@@ -20,20 +20,25 @@ const option = [
 fs.readdir(dir, (err, files) => {
   if (err) throw err;
   
+  //コマンド生成
+  let command = 'tippecanoe';
+  command = command + ' -e ' + 'pbf';
+  
   files.forEach( file => {
+  
     const filepath = dir + '/' + file;
-    const outdir = file.substr(3,5); // 要調整
-    
-    //コマンド生成
-    let command = 'tippecanoe';
-    option.forEach( op => {
-      command = command + " " + op;
-    });
-    command = command + ' -e ' + 'pbf/' + outdir + " " + filepath;
-    console.log(command);
-    child_process.execSync(`${command}`);
+    command = command  + " " + filepath;
+  
   });
-
+  
+  option.forEach( op => {
+    command = command + " " + op;
+  });
+  
+  
+  console.log(command);
+  child_process.execSync(`${command}`);
+  
 });
 
 
